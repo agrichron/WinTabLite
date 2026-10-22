@@ -26,7 +26,7 @@ WinTab Lite 只用屏幕左侧一条，显示**真实缩略图**，并且**全�
 
 ## 快速开始
 
-**直接运行**：从 [Releases](https://github.com/agrichron/WinTabLite/releases/latest) 下载 `WinTabLite.exe`，放到任意目录双击即可（单文件，无需 Python）。`config.ini` 需与 exe 同目录（缺省则用内置默认值）。
+**直接运行**：从 [Releases](https://github.com/agrichron/WinTabLite/releases/latest) 下载 `WinTabLite-v1.0.0-win64.zip`，解压后双击 `WinTabLite.exe`（单文件，无需 Python）。压缩包里已带 `config.ini`，两者必须放同一目录；删掉 config.ini 则用内置默认值。
 
 **从源码运行**：
 
