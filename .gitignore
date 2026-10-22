@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 打包产物
+build/
+dist/
+*.spec
+
+# 编辑器
+.vscode/
+.idea/
+
+# 运行时生成
+*.log
+*.png
+!docs/preview.png
+
+# 被安全策略锁定的历史文件（保留在本地，不入库；已有同名 ASCII 版本）
+使用说明.md
+启动.cmd
+打包.cmd
