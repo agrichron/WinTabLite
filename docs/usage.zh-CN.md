@@ -117,9 +117,13 @@ build.cmd
 
 ```bat
 python wintab_lite.py --shot out.png   # 不开常驻，直接把面板画出来存图
+python wintab_lite.py --shot out.png --anon   # 同上，但脱敏：标题换示例文本 + 缩略图灰度马赛克
 python wintab_lite.py --show           # 直接显示面板，不进托盘
 python tests/selftest.py               # 自检：枚举/标题/缩略图/焦点
 ```
+
+`--anon` 用于生成可以公开的截图：它先把 `cells` 里的真实标题替换成「示例项目 A / 代码仓库 / 数据表 …」，
+再按 `_dest_rects`（DWM 缩略图的落点）逐格做灰度马赛克，标题文字与面板 UI 保持清晰。
 
 `tests/` 下是**手工验证脚本**，会用真实鼠标点击、真实窗口，不是单元测试：
 

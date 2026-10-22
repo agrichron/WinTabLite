@@ -730,6 +730,32 @@ class Drawer(QWidget):
                    "#2d9cdb", "#f2c94c", "#56ccf2", "#bb6bd9", "#6fcf97")
         return QColor(palette[zlib.crc32(key.encode("utf-8")) % len(palette)])
 
+    ANON_NAMES = ("示例项目 A", "示例项目 B", "代码仓库", "数据表", "终端会话",
+                  "浏览器", "聊天窗口", "文件管理", "设置", "文档")
+
+    def anonymize(self):
+        """把窗口标题换成示例文本（截图用，避免泄露真实项目名）。"""
+        self.cells = [(c[0], self.ANON_NAMES[i % len(self.ANON_NAMES)], "", c[3])
+                      for i, c in enumerate(self.cells)]
+
+    def mosaic_regions(self, img, block=12):
+        """给每个缩略图区域打灰度马赛克；标题和面板 UI 保持清晰。"""
+        from PIL import Image, ImageEnhance
+        for r in self._dest_rects.values():
+            box = (max(0, r.x()), max(0, r.y()),
+                   min(img.width, r.right()), min(img.height, r.bottom()))
+            w, h = box[2] - box[0], box[3] - box[1]
+            if w < 8 or h < 8:
+                continue
+            crop = img.crop(box)
+            small = crop.resize((max(1, w // block), max(1, h // block)), Image.NEAREST)
+            tile = small.resize((w, h), Image.NEAREST)
+            # 去色 + 压暗：明确的"已遮挡"观感，不会用颜色暗示原内容
+            tile = ImageEnhance.Color(tile).enhance(0.0)
+            tile = ImageEnhance.Brightness(tile).enhance(0.82)
+            img.paste(tile, box[:2])
+        return img
+
     def _icon_for(self, exe):
         if not exe:
             return None
@@ -1218,17 +1244,24 @@ def main():
         QTimer.singleShot(600, app.drawer.open)
 
         def _grab():
-            from PIL import ImageGrab
+            from PIL import Image, ImageGrab
             d = app.drawer
+            anon = "--anon" in sys.argv
+            if anon:
+                d.anonymize()          # 标题换成示例文本
             d._place_thumbs()
+            d.update()
             app.qapp.processEvents()
             dpr = d.devicePixelRatioF() if hasattr(d, "devicePixelRatioF") else 1.0
             g = app.drawer.geometry()
             box = (int(g.x() * dpr), int(g.y() * dpr),
                    int((g.x() + g.width()) * dpr), int((g.y() + g.height()) * dpr))
             img = ImageGrab.grab(bbox=box, all_screens=True)
+            if anon:
+                img = d.mosaic_regions(img)    # 缩略图内容打码
             img.save(out)
-            print("saved %s %s dpr=%.2f geom=%s" % (out, img.size, dpr, g))
+            print("saved %s %s dpr=%.2f geom=%s%s" % (out, img.size, dpr, g,
+                                                      "  (已脱敏)" if anon else ""))
             app.qapp.quit()
 
         QTimer.singleShot(1600, _grab)
